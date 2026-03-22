@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkpoint</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ======== AUTH SCREENS ======== -->
+  <div id="authScreen">
+    <div class="auth-wrapper">
+      <div class="auth-left">
+        <div class="auth-brand">
+          <div class="brand-icon">⚔</div>
+          <h1>Checkpoint</h1>
+          <p class="brand-tagline">Your semester is an RPG.<br>Plan smarter. Level up. Don't burn out.</p>
+        </div>
+        <div class="auth-features">
+          <div class="feature-pill"><span class="pill-icon">🗺</span> Semester Heatmap</div>
+          <div class="feature-pill"><span class="pill-icon">📜</span> Daily Quest Log</div>
+          <div class="feature-pill"><span class="pill-icon">❤️</span> HP & Wellness Tracking</div>
+          <div class="feature-pill"><span class="pill-icon">☠</span> Boss Fight Alerts</div>
+          <div class="feature-pill"><span class="pill-icon">🏆</span> Achievements</div>
+        </div>
+      </div>
+      <div class="auth-right">
+        <div class="auth-card" id="loginCard">
+          <h2>Welcome back</h2>
+          <p class="auth-sub">Log in to continue your adventure</p>
+          <form id="loginForm">
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" id="loginEmail" placeholder="you@university.edu" required>
+            </div>
+            <div class="input-group">
+              <label>Password</label>
+              <input type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            <div id="loginError" class="auth-error"></div>
+            <button type="submit" class="btn-primary">Log In</button>
+          </form>
+          <p class="auth-switch">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+        </div>
+        <div class="auth-card hidden" id="signupCard">
+          <h2>Create your character</h2>
+          <p class="auth-sub">Start your semester adventure</p>
+          <form id="signupForm">
+            <div class="input-group">
+              <label>Username</label>
+              <input type="text" id="signupUsername" placeholder="Choose a name" required>
+            </div>
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" id="signupEmail" placeholder="you@university.edu" required>
+            </div>
+            <div class="input-group">
+              <label>Password</label>
+              <input type="password" id="signupPassword" placeholder="6+ characters" required>
+            </div>
+            <div id="signupError" class="auth-error"></div>
+            <button type="submit" class="btn-primary">Create Account</button>
+          </form>
+          <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Log in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== MAIN APP ======== -->
+  <div id="appScreen" class="hidden">
+    <nav id="topNav">
+      <div class="nav-left">
+        <span class="nav-logo">⚔ Checkpoint</span>
+      </div>
+      <div class="nav-center">
+        <div class="nav-bars">
+          <div class="nav-bar-group">
+            <span class="nav-bar-label">HP</span>
+            <div class="nav-bar hp"><div class="nav-bar-fill" id="hpFill"></div></div>
+            <span class="nav-bar-val" id="hpText">100</span>
+          </div>
+          <div class="nav-bar-group">
+            <span class="nav-bar-label">XP</span>
+            <div class="nav-bar xp"><div class="nav-bar-fill" id="xpFill"></div></div>
+            <span class="nav-bar-val" id="xpText">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user" id="navUsername"></span>
+        <button class="btn-sm" id="checkInBtn">Check In</button>
+        <button class="btn-sm btn-ghost" id="logoutBtn">Log Out</button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="top-bar">
+        <div class="level-display">
+          <span class="level-label">WEEK</span>
+          <span class="level-num" id="currentWeek">—</span>
+          <span class="level-of">of</span>
+          <span class="level-num" id="totalWeeks">—</span>
+        </div>
+        <div class="top-actions">
+          <button class="btn-sm" id="settingsBtn">⚙ Setup</button>
+          <button class="btn-sm" id="importBtn">↑ Import</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stack">
+          <div class="card">
+            <div class="card-header">
+              <h3>Semester Map</h3>
+              <div class="legend">
+                <span><i class="dot dot-chill"></i>Chill</span>
+                <span><i class="dot dot-moderate"></i>Busy</span>
+                <span><i class="dot dot-intense"></i>Intense</span>
+                <span><i class="dot dot-boss"></i>Boss</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="weekGrid"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Achievements</h3></div>
+            <div class="card-body">
+              <div id="achievementGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="card">
+            <div class="card-header">
+              <h3>Today's Quests</h3>
+              <span class="badge" id="questCounter">0/0</span>
+            </div>
+            <div class="card-body">
+              <ul id="questList" class="quest-list"></ul>
+              <p id="noQuests" class="empty-state">No quests yet — add courses to start.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Boss Fights</h3></div>
+            <div class="card-body">
+              <ul id="bossList" class="boss-list"></ul>
+              <p id="noBosses" class="empty-state">No boss fights on the horizon.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== MODALS ======== -->
+  <div class="overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Semester Setup</h3>
+        <button class="modal-close" id="closeSettingsModal">&times;</button>
+      </div>
+      <form id="settingsForm" class="modal-body">
+        <div class="input-group">
+          <label>Semester Start</label>
+          <input type="date" id="semStart" required>
+        </div>
+        <div class="input-group">
+          <label>Semester End</label>
+          <input type="date" id="semEnd" required>
+        </div>
+        <div class="input-group">
+          <label>Energy Type</label>
+          <select id="energyType">
+            <option value="morning">Morning person</option>
+            <option value="night">Night owl</option>
+            <option value="afternoon">Afternoon warrior</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary btn-full">Save Settings</button>
+      </form>
+      <hr>
+      <div class="modal-body">
+        <button class="btn-primary btn-full" id="addCourseBtn">+ Add Course</button>
+        <div id="courseListDisplay" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="courseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Course</h3>
+        <button class="modal-close" id="closeCourseModal">&times;</button>
+      </div>
+      <form id="courseForm" class="modal-body">
+        <div class="input-group">
+          <label>Course Name</label>
+          <input type="text" id="courseName" placeholder="e.g. CSCI 2110" required>
+        </div>
+        <div class="input-group">
+          <label>Difficulty</label>
+          <input type="range" id="courseDiff" min="1" max="5" value="3">
+          <div class="stars" id="diffStars">★★★☆☆</div>
+        </div>
+        <div id="deadlineList"><label>Deadlines</label></div>
+        <button type="button" class="btn-sm" id="addDeadlineBtn">+ Add Deadline</button>
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <button type="submit" class="btn-primary">Save</button>
+          <button type="button" class="btn-sm btn-ghost" id="cancelCourseBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="overlay" id="checkinModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Daily Check-In</h3>
+        <button class="modal-close" id="closeCheckinModal">&times;</button>
+      </div>
+      <form id="checkinForm" class="modal-body">
+        <div class="input-group">
+          <label>Sleep Quality</label>
+          <div class="range-row">
+            <span>😴</span>
+            <input type="range" id="sleepScore" min="1" max="5" value="3">
+            <span class="range-val" id="sleepLabel">3</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Stress Level</label>
+          <div class="range-row">
+            <span>😰</span>
+            <input type="range" id="stressScore" min="1" max="5" value="3">
+            <span class="range-val" id="stressLabel">3</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Exercise Today?</label>
+          <select id="exerciseCheck">
+            <option value="no">Nah</option>
+            <option value="yes">Yeah!</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary btn-full">Log It</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="overlay" id="importModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Import Schedule</h3>
+        <button class="modal-close" id="closeImportModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab active" data-tab="ics">ICS File</button>
+          <button class="tab" data-tab="paste">Paste Syllabus</button>
+          <button class="tab" data-tab="manual">Quick Add</button>
+        </div>
+        <div class="tab-panel active" id="tab-ics">
+          <div class="dropzone" id="dropZone">
+            <div class="dropzone-icon">📁</div>
+            <p>Drag & drop .ics file here</p>
+            <span class="dropzone-or">or</span>
+            <label class="btn-sm file-pick">Browse <input type="file" id="icsFileInput" accept=".ics" hidden></label>
+          </div>
+          <div id="icsPreview" class="preview hidden">
+            <h4>Found Events:</h4>
+            <ul id="icsEventList"></ul>
+            <div class="preview-actions">
+              <button class="btn-primary" id="icsImportConfirm">Import All</button>
+              <button class="btn-sm btn-ghost" id="icsClear">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tab-paste">
+          <textarea id="syllabusText" rows="6" placeholder="Paste your syllabus dates here...&#10;e.g. CSCI 2110 - Midterm - March 15&#10;MATH 1000 - Assignment 3 - Feb 20"></textarea>
+          <button class="btn-primary" id="parseSyllabus" style="margin-top:8px">Parse Dates</button>
+          <div id="pastePreview" class="preview hidden">
+            <h4>Found:</h4>
+            <ul id="pasteEventList"></ul>
+            <div class="preview-actions">
+              <button class="btn-primary" id="pasteImportConfirm">Import All</button>
+              <button class="btn-sm btn-ghost" id="pasteClear">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tab-manual">
+          <div id="quickAddList"></div>
+          <button class="btn-sm" id="quickAddRow" style="margin-top:8px">+ Add Row</button>
+          <button class="btn-primary btn-full" id="quickAddConfirm" style="margin-top:12px">Import All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

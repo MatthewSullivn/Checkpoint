@@ -1,0 +1,28 @@
+{
+  "name": "checkpoint",
+  "version": "1.0.0",
+  "description": "Your semester RPG",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MatthewSullivn/testt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MatthewSullivn/testt/issues"
+  },
+  "homepage": "https://github.com/MatthewSullivn/testt#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.8.0",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  }
+}
