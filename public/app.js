@@ -8,6 +8,7 @@ var courses = [];
 var checkins = [];
 var completedQuests = [];
 var achievements = [];
+var currentMapView = 'weekly';
 
 // =========== API HELPERS ===========
 
@@ -192,6 +193,48 @@ function getWeekDeadlines(week) {
   return out;
 }
 
+// =========== WEEKLY MAP HELPERS ===========
+
+function getCurrentCalendarWeekStart() {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var day = today.getDay();
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+  return monday;
+}
+
+function getDayLoad(dateStr) {
+  var load = 0;
+  courses.forEach(function(c) {
+    (c.deadlines || []).forEach(function(dl) {
+      if (dl.date === dateStr) {
+        var weight = dl.type === 'exam' ? 3 : dl.type === 'project' ? 2 : 1;
+        load += c.difficulty * weight;
+      }
+    });
+  });
+  return load;
+}
+
+function classifyDay(load) {
+  if (load >= 12) return 'boss';
+  if (load >= 7) return 'intense';
+  if (load >= 3) return 'moderate';
+  return 'chill';
+}
+
+function getDayDeadlines(dateStr) {
+  var out = [];
+  courses.forEach(function(c) {
+    (c.deadlines || []).forEach(function(dl) {
+      if (dl.date === dateStr)
+        out.push({ course: c.name, label: dl.label, type: dl.type });
+    });
+  });
+  return out;
+}
+
 // =========== RENDERING ===========
 
 function renderWeekGrid() {
@@ -231,6 +274,49 @@ function renderWeekGrid() {
   });
 
   if (!foundCurrent) document.getElementById('currentWeek').textContent = '—';
+}
+
+function renderWeeklyMap() {
+  var container = document.getElementById('weeklyMapView');
+  container.innerHTML = '';
+
+  var weekStart = getCurrentCalendarWeekStart();
+  var dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  var todayDateStr = todayStr();
+
+  var grid = document.createElement('div');
+  grid.className = 'daily-grid';
+
+  for (var i = 0; i < 7; i++) {
+    var day = new Date(weekStart);
+    day.setDate(weekStart.getDate() + i);
+    var dateStr = day.getFullYear() + '-' + pad(day.getMonth() + 1) + '-' + pad(day.getDate());
+
+    var load = getDayLoad(dateStr);
+    var cls = classifyDay(load);
+    var deadlines = getDayDeadlines(dateStr);
+    var isToday = dateStr === todayDateStr;
+
+    var tipText = dayNames[i] + ', ' + formatDate(dateStr);
+    if (deadlines.length)
+      tipText += ': ' + deadlines.map(function(d) { return d.course + ' — ' + d.label; }).join(', ');
+
+    var tile = document.createElement('div');
+    tile.className = 'day-tile ' + cls;
+    if (isToday) tile.classList.add('today');
+
+    var sublabel = deadlines.length ? deadlines.length + (deadlines.length === 1 ? ' due' : ' due') : cls;
+
+    tile.innerHTML =
+      '<span class="dname">' + dayNames[i] + '</span>' +
+      '<span class="ddate">' + pad(day.getDate()) + '</span>' +
+      '<span class="dlabel">' + sublabel + '</span>' +
+      '<div class="day-tooltip">' + tipText + '</div>';
+
+    grid.appendChild(tile);
+  }
+
+  container.appendChild(grid);
 }
 
 function renderQuests() {
@@ -430,6 +516,26 @@ function toggleQuest(id) {
     updateBars();
   });
 }
+
+// =========== MAP VIEW TOGGLE ===========
+
+document.getElementById('weeklyMapBtn').onclick = function() {
+  currentMapView = 'weekly';
+  document.getElementById('weeklyMapBtn').classList.add('active');
+  document.getElementById('semesterMapBtn').classList.remove('active');
+  document.getElementById('weeklyMapView').classList.remove('hidden');
+  document.getElementById('weekGrid').classList.add('hidden');
+  renderWeeklyMap();
+};
+
+document.getElementById('semesterMapBtn').onclick = function() {
+  currentMapView = 'semester';
+  document.getElementById('semesterMapBtn').classList.add('active');
+  document.getElementById('weeklyMapBtn').classList.remove('active');
+  document.getElementById('weekGrid').classList.remove('hidden');
+  document.getElementById('weeklyMapView').classList.add('hidden');
+  renderWeekGrid();
+};
 
 // =========== MODALS ===========
 
@@ -772,7 +878,11 @@ function guessType(text) {
 // =========== RENDER ALL ===========
 
 function renderAll() {
-  renderWeekGrid();
+  if (currentMapView === 'weekly') {
+    renderWeeklyMap();
+  } else {
+    renderWeekGrid();
+  }
   renderQuests();
   renderBossFights();
   renderAchievements();

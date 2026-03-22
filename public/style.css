@@ -539,6 +539,116 @@ input[type="range"] {
   text-transform: uppercase;
 }
 
+/* ========== MAP TABS ========== */
+
+.map-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.map-tab {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  background: none;
+  border: 2px solid var(--border);
+  color: var(--text3);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  margin-right: -2px;
+}
+
+.map-tab:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+
+.map-tab.active {
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
+  z-index: 1;
+}
+
+/* ========== DAILY MAP (WEEKLY VIEW) ========== */
+
+.daily-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day-tile {
+  aspect-ratio: 0.85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  background: var(--white);
+  position: relative;
+  cursor: default;
+  transition: all 0.15s;
+  gap: 2px;
+}
+
+.day-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 0 var(--border);
+}
+
+.day-tile.today {
+  border-color: var(--primary);
+  box-shadow: 3px 3px 0 var(--primary);
+}
+
+.day-tile .dname {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.day-tile .ddate {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.day-tile .dlabel {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.day-tile.chill { background: #dcfce7; color: #166534; border-color: var(--chill); }
+.day-tile.moderate { background: #fef9c3; color: #854d0e; border-color: var(--moderate); }
+.day-tile.intense { background: #ffedd5; color: #9a3412; border-color: var(--intense); }
+.day-tile.boss { background: #ffe4e6; color: #9f1239; border-color: var(--boss); }
+
+.day-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--black);
+  color: var(--white);
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.day-tile:hover .day-tooltip { display: block; }
+
 /* ========== WEEK GRID ========== */
 
 #weekGrid {
@@ -975,4 +1085,6 @@ input[type="range"] {
   #topNav { padding: 10px 16px; }
   .container { padding: 16px; }
   #achievementGrid { grid-template-columns: repeat(3, 1fr); }
+  .daily-grid { grid-template-columns: repeat(4, 1fr); }
+  .map-tabs { flex-wrap: wrap; }
 }

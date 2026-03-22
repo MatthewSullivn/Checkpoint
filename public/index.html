@@ -115,7 +115,10 @@
         <div class="stack">
           <div class="card">
             <div class="card-header">
-              <h3>Semester Map</h3>
+              <div class="map-tabs">
+                <button class="map-tab active" id="weeklyMapBtn">Weekly Map</button>
+                <button class="map-tab" id="semesterMapBtn">Semester Map</button>
+              </div>
               <div class="legend">
                 <span><i class="dot dot-chill"></i>Chill</span>
                 <span><i class="dot dot-moderate"></i>Busy</span>
@@ -124,7 +127,8 @@
               </div>
             </div>
             <div class="card-body">
-              <div id="weekGrid"></div>
+              <div id="weeklyMapView"></div>
+              <div id="weekGrid" class="hidden"></div>
             </div>
           </div>
           <div class="card">
