@@ -8,8 +8,10 @@ var courses = [];
 var checkins = [];
 var completedQuests = [];
 var achievements = [];
+var todos = [];
 var currentMapView = 'weekly';
 var selectedDay = null;
+var syllabusCollapsed = false;
 
 // =========== API HELPERS ===========
 
@@ -108,13 +110,15 @@ function loadAll() {
     get('/api/courses'),
     get('/api/checkins'),
     get('/api/quests/completed'),
-    get('/api/achievements')
+    get('/api/achievements'),
+    get('/api/todos?date=' + todayStr())
   ]).then(function(results) {
     currentUser = results[0].user;
     courses = results[1].courses;
     checkins = results[2].checkins;
     completedQuests = results[3].quests;
     achievements = results[4].achievements;
+    todos = results[5].todos;
     renderAll();
   });
 }
@@ -264,13 +268,28 @@ function renderWeekGrid() {
     if (cls === 'boss') tile.classList.add('boss-week');
 
     var dls = getWeekDeadlines(w);
-    var tip = 'Week ' + w.num;
-    if (dls.length) tip += ': ' + dls.map(function(d) { return d.course + ' - ' + d.label; }).join(', ');
+    var wStart = w.start.getFullYear() + '-' + pad(w.start.getMonth()+1) + '-' + pad(w.start.getDate());
+    var wEnd = w.end.getFullYear() + '-' + pad(w.end.getMonth()+1) + '-' + pad(w.end.getDate());
+
+    var tipHtml = '<div class="week-tooltip">';
+    tipHtml += '<div class="tip-header">Week ' + w.num + '</div>';
+    tipHtml += '<div class="tip-dates">' + formatDate(wStart) + ' - ' + formatDate(wEnd) + '</div>';
+    tipHtml += '<div class="tip-intensity ' + cls + '">Intensity: ' + cls.toUpperCase() + '</div>';
+    if (dls.length) {
+      tipHtml += '<div class="tip-section">' + dls.length + ' deadline' + (dls.length > 1 ? 's' : '') + ':</div>';
+      dls.forEach(function(d) {
+        var icon = d.type === 'exam' ? '&#9760;' : d.type === 'project' ? '&#9876;' : '&#9998;';
+        tipHtml += '<div class="tip-item">' + icon + ' ' + d.course + ' - ' + d.label + ' (' + formatDate(d.date) + ')</div>';
+      });
+    } else {
+      tipHtml += '<div class="tip-empty">No deadlines this week</div>';
+    }
+    tipHtml += '</div>';
 
     tile.innerHTML =
       '<span class="wnum">W' + w.num + '</span>' +
       '<span class="wlabel">' + cls + '</span>' +
-      '<div class="week-tooltip">' + tip + '</div>';
+      tipHtml;
     grid.appendChild(tile);
   });
 
@@ -308,10 +327,25 @@ function renderWeeklyMap() {
 
     var sublabel = deadlines.length ? deadlines.length + (deadlines.length === 1 ? ' due' : ' due') : cls;
 
+    var tipHtml = '<div class="day-tooltip">';
+    tipHtml += '<div class="tip-header">' + dayNames[i] + ', ' + formatDate(dateStr) + (isToday ? ' (Today)' : '') + '</div>';
+    tipHtml += '<div class="tip-intensity ' + cls + '">Intensity: ' + cls.toUpperCase() + '</div>';
+    if (deadlines.length) {
+      tipHtml += '<div class="tip-section">Deadlines:</div>';
+      deadlines.forEach(function(d) {
+        var icon = d.type === 'exam' ? '&#9760;' : d.type === 'project' ? '&#9876;' : '&#9998;';
+        tipHtml += '<div class="tip-item">' + icon + ' ' + d.course + ' - ' + d.label + '</div>';
+      });
+    } else {
+      tipHtml += '<div class="tip-empty">No deadlines</div>';
+    }
+    tipHtml += '</div>';
+
     tile.innerHTML =
       '<span class="dname">' + dayNames[i] + '</span>' +
       '<span class="ddate">' + pad(day.getDate()) + '</span>' +
-      '<span class="dlabel">' + sublabel + '</span>';
+      '<span class="dlabel">' + sublabel + '</span>' +
+      tipHtml;
 
     tile.setAttribute('data-date', dateStr);
     tile.setAttribute('data-dayname', dayNames[i]);
@@ -507,14 +541,14 @@ function renderBossFights() {
 // =========== ACHIEVEMENTS ===========
 
 var achDefs = [
-  { id: 'first-checkin', icon: '🌅', name: 'First Dawn', desc: 'First check-in' },
-  { id: 'streak-3', icon: '🔥', name: 'On Fire', desc: '3-day streak' },
-  { id: 'streak-7', icon: '⚡', name: 'Unstoppable', desc: '7-day streak' },
-  { id: 'q5', icon: '⚔', name: 'Adventurer', desc: '5 quests done' },
-  { id: 'q20', icon: '🛡', name: 'Veteran', desc: '20 quests done' },
-  { id: 'q50', icon: '👑', name: 'Legend', desc: '50 quests done' },
-  { id: 'first-course', icon: '📘', name: 'Enrolled', desc: 'Add first course' },
-  { id: 'five-courses', icon: '🎓', name: 'Full Load', desc: 'Add 5 courses' }
+  { id: 'first-checkin', icon: '🌅', name: 'First Dawn', desc: 'Complete your first daily check-in', howTo: 'Click "Check In" and log your sleep, stress & exercise' },
+  { id: 'streak-3', icon: '🔥', name: 'On Fire', desc: 'Check in 3 days in a row', howTo: 'Do a daily check-in for 3 consecutive days' },
+  { id: 'streak-7', icon: '⚡', name: 'Unstoppable', desc: 'Check in 7 days in a row', howTo: 'Do a daily check-in for 7 consecutive days' },
+  { id: 'q5', icon: '⚔', name: 'Adventurer', desc: 'Complete 5 quests', howTo: 'Check off 5 quests from your daily quest list' },
+  { id: 'q20', icon: '🛡', name: 'Veteran', desc: 'Complete 20 quests', howTo: 'Check off 20 quests total — keep grinding!' },
+  { id: 'q50', icon: '👑', name: 'Legend', desc: 'Complete 50 quests', howTo: 'Check off 50 quests total — true dedication' },
+  { id: 'first-course', icon: '📘', name: 'Enrolled', desc: 'Add your first course', howTo: 'Go to Setup and add a course, or use Import' },
+  { id: 'five-courses', icon: '🎓', name: 'Full Load', desc: 'Add 5 courses', howTo: 'Add 5 courses to your semester plan' }
 ];
 
 function checkAchievements() {
@@ -545,14 +579,43 @@ function getStreak() {
   return streak;
 }
 
+function getAchProgress(a) {
+  var unlocked = achievements.indexOf(a.id) !== -1;
+  if (unlocked) return { text: 'Unlocked!', pct: 100 };
+  switch (a.id) {
+    case 'first-checkin': return { text: checkins.length + '/1 check-ins', pct: Math.min(100, checkins.length * 100) };
+    case 'streak-3': var s3 = getStreak(); return { text: s3 + '/3 day streak', pct: Math.min(100, Math.round(s3/3*100)) };
+    case 'streak-7': var s7 = getStreak(); return { text: s7 + '/7 day streak', pct: Math.min(100, Math.round(s7/7*100)) };
+    case 'q5': return { text: completedQuests.length + '/5 quests', pct: Math.min(100, Math.round(completedQuests.length/5*100)) };
+    case 'q20': return { text: completedQuests.length + '/20 quests', pct: Math.min(100, Math.round(completedQuests.length/20*100)) };
+    case 'q50': return { text: completedQuests.length + '/50 quests', pct: Math.min(100, Math.round(completedQuests.length/50*100)) };
+    case 'first-course': return { text: courses.length + '/1 courses', pct: Math.min(100, courses.length * 100) };
+    case 'five-courses': return { text: courses.length + '/5 courses', pct: Math.min(100, Math.round(courses.length/5*100)) };
+    default: return { text: '', pct: 0 };
+  }
+}
+
 function renderAchievements() {
   var grid = document.getElementById('achievementGrid');
   grid.innerHTML = '';
   achDefs.forEach(function(a) {
+    var unlocked = achievements.indexOf(a.id) !== -1;
+    var progress = getAchProgress(a);
     var div = document.createElement('div');
-    div.className = 'achievement ' + (achievements.indexOf(a.id) !== -1 ? 'unlocked' : 'locked');
-    div.innerHTML = '<span class="ach-icon">' + a.icon + '</span><span class="ach-name">' + a.name + '</span>';
-    div.title = a.desc;
+    div.className = 'achievement ' + (unlocked ? 'unlocked' : 'locked');
+    div.innerHTML =
+      '<span class="ach-icon">' + a.icon + '</span>' +
+      '<span class="ach-name">' + a.name + '</span>' +
+      '<div class="ach-tooltip">' +
+        '<div class="ach-tooltip-title">' + a.icon + ' ' + a.name + '</div>' +
+        '<div class="ach-tooltip-desc">' + a.desc + '</div>' +
+        (unlocked
+          ? '<div class="ach-tooltip-status ach-unlocked-status">Unlocked!</div>'
+          : '<div class="ach-tooltip-how">How: ' + a.howTo + '</div>' +
+            '<div class="ach-tooltip-progress-bar"><div class="ach-tooltip-progress-fill" style="width:' + progress.pct + '%"></div></div>' +
+            '<div class="ach-tooltip-status">' + progress.text + '</div>'
+        ) +
+      '</div>';
     grid.appendChild(div);
   });
 }
@@ -568,6 +631,60 @@ function updateBars() {
   document.getElementById('xpText').textContent = xp;
 }
 
+// =========== XP TOAST ===========
+
+var xpToastTimer = null;
+function showXpToast(amount) {
+  var el = document.getElementById('xpToast');
+  el.textContent = (amount > 0 ? '+' : '') + amount + ' XP';
+  el.classList.add('show');
+  if (xpToastTimer) clearTimeout(xpToastTimer);
+  xpToastTimer = setTimeout(function() { el.classList.remove('show'); }, 1500);
+}
+
+// =========== CHECK-IN LOG ===========
+
+function renderCheckinLog() {
+  var container = document.getElementById('checkinLog');
+  var noMsg = document.getElementById('noCheckins');
+  var streakBadge = document.getElementById('streakBadge');
+  container.innerHTML = '';
+
+  var streak = getStreak();
+  streakBadge.textContent = streak + ' day streak';
+
+  if (!checkins.length) { noMsg.style.display = ''; return; }
+  noMsg.style.display = 'none';
+
+  // show most recent 7
+  var recent = checkins.slice(0, 7);
+  recent.forEach(function(ci) {
+    var hp = calcHPClient(ci.sleep, ci.stress, ci.exercise);
+    var hpClass = hp >= 70 ? 'hp-high' : hp >= 40 ? 'hp-mid' : 'hp-low';
+    var sleepLabel = ['', 'Awful', 'Poor', 'Ok', 'Good', 'Great'][ci.sleep] || ci.sleep;
+    var stressLabel = ['', 'Zen', 'Low', 'Med', 'High', 'Max'][ci.stress] || ci.stress;
+
+    var row = document.createElement('div');
+    row.className = 'checkin-row';
+    row.innerHTML =
+      '<span class="checkin-date">' + formatDate(ci.date) + '</span>' +
+      '<div class="checkin-stats">' +
+        '<span class="checkin-stat">Sleep: ' + sleepLabel + '</span>' +
+        '<span class="checkin-stat">Stress: ' + stressLabel + '</span>' +
+        '<span class="checkin-stat">' + (ci.exercise ? 'Moved' : 'Rest') + '</span>' +
+      '</div>' +
+      '<span class="checkin-hp ' + hpClass + '">' + hp + ' HP</span>';
+    container.appendChild(row);
+  });
+}
+
+function calcHPClient(sleep, stress, exercise) {
+  var sleepBoost = (sleep - 1) * 10;
+  var stressHit = (stress - 1) * 8;
+  var exerciseBoost = exercise ? 15 : 0;
+  return Math.min(100, Math.max(10, 50 + sleepBoost - stressHit + exerciseBoost));
+}
+
 // =========== QUEST TOGGLE ===========
 
 function toggleQuest(id) {
@@ -577,6 +694,7 @@ function toggleQuest(id) {
       var idx = completedQuests.indexOf(id);
       if (idx !== -1) completedQuests.splice(idx, 1);
     }
+    showXpToast(data.completed ? 10 : -10);
     currentUser.xp = data.xp;
     checkAchievements();
     renderQuests();
@@ -945,16 +1063,238 @@ function guessType(text) {
   return 'assignment';
 }
 
+// =========== GET STARTED BOX ===========
+
+function renderGetStarted() {
+  var box = document.getElementById('getStartedBox');
+  var hasDates = currentUser.sem_start && currentUser.sem_end;
+  var hasCourses = courses.length > 0;
+  var hasCheckins = checkins.length > 0;
+
+  // hide if all steps done
+  if (hasDates && hasCourses && hasCheckins) {
+    box.classList.add('hidden');
+    return;
+  }
+
+  box.classList.remove('hidden');
+
+  var s1 = document.getElementById('gsStep1');
+  var s2 = document.getElementById('gsStep2');
+  var s3 = document.getElementById('gsStep3');
+
+  if (hasDates) { s1.classList.add('gs-done'); } else { s1.classList.remove('gs-done'); }
+  if (hasCourses) { s2.classList.add('gs-done'); } else { s2.classList.remove('gs-done'); }
+  if (hasCheckins) { s3.classList.add('gs-done'); } else { s3.classList.remove('gs-done'); }
+}
+
+document.getElementById('gsSetupBtn').onclick = function() {
+  document.getElementById('semStart').value = currentUser.sem_start || '';
+  document.getElementById('semEnd').value = currentUser.sem_end || '';
+  document.getElementById('energyType').value = currentUser.energy_type || 'morning';
+  renderCourseList();
+  openModal('settingsModal');
+};
+
+document.getElementById('gsImportBtn').onclick = function() {
+  document.getElementById('quickAddList').innerHTML = '';
+  for (var i = 0; i < 3; i++) addQuickRow();
+  openModal('importModal');
+};
+
+document.getElementById('gsCheckinBtn').onclick = function() {
+  openModal('checkinModal');
+};
+
+document.getElementById('dismissGetStarted').onclick = function() {
+  document.getElementById('getStartedBox').classList.add('hidden');
+};
+
+// =========== SYLLABUS INLINE IMPORT ===========
+
+var inlineParsed = [];
+
+function renderSyllabusImport() {
+  var card = document.getElementById('syllabusImportCard');
+  if (courses.length === 0 || syllabusCollapsed) {
+    card.classList.add('hidden');
+    return;
+  }
+  card.classList.remove('hidden');
+
+  // populate course select
+  var sel = document.getElementById('syllabusCourseSelect');
+  var currentVal = sel.value;
+  sel.innerHTML = '<option value="">Select course...</option>';
+  courses.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if (currentVal) sel.value = currentVal;
+}
+
+document.getElementById('syllabusCollapseBtn').onclick = function() {
+  syllabusCollapsed = true;
+  document.getElementById('syllabusImportCard').classList.add('hidden');
+};
+
+document.getElementById('syllabusInlineParse').onclick = function() {
+  inlineParsed = parseSyllabusText(document.getElementById('syllabusInlineText').value);
+  showInlinePreview();
+};
+
+function showInlinePreview() {
+  var el = document.getElementById('syllabusInlinePreview');
+  var list = document.getElementById('syllabusInlineList');
+  if (!inlineParsed.length) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  list.innerHTML = '';
+  inlineParsed.forEach(function(ev) {
+    var li = document.createElement('li');
+    li.innerHTML = '<span>' + ev.summary + '</span><span class="ev-date">' + formatDate(ev.date) + '</span>';
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('syllabusInlineImport').onclick = function() {
+  var courseName = document.getElementById('syllabusCourseSelect').value;
+  if (!courseName) { courseName = 'Imported'; }
+  var events = inlineParsed.map(function(ev) {
+    return { label: ev.summary, date: ev.date, type: guessType(ev.summary) };
+  });
+  post('/api/import', { events: events, courseName: courseName }).then(function() {
+    inlineParsed = [];
+    document.getElementById('syllabusInlinePreview').classList.add('hidden');
+    document.getElementById('syllabusInlineText').value = '';
+    loadAll();
+  });
+};
+
+document.getElementById('syllabusInlineClear').onclick = function() {
+  inlineParsed = [];
+  document.getElementById('syllabusInlinePreview').classList.add('hidden');
+};
+
+// =========== DAILY TODOS ===========
+
+function renderTodos() {
+  var list = document.getElementById('todoList');
+  var noMsg = document.getElementById('noTodos');
+  var counter = document.getElementById('todoCounter');
+  list.innerHTML = '';
+
+  if (!todos.length) {
+    noMsg.style.display = '';
+    counter.textContent = '0';
+    return;
+  }
+  noMsg.style.display = 'none';
+
+  var doneCount = 0;
+  todos.forEach(function(t) {
+    if (t.done) doneCount++;
+    var li = document.createElement('li');
+    if (t.done) li.classList.add('done');
+
+    var btn = document.createElement('button');
+    btn.className = 'quest-check';
+    btn.textContent = t.done ? '✓' : '';
+    btn.onclick = function() { toggleTodo(t.id, !t.done); };
+
+    var txt = document.createElement('span');
+    txt.className = 'quest-text';
+    txt.textContent = t.text;
+
+    var tag = document.createElement('span');
+    tag.className = 'quest-tag wellness';
+    tag.textContent = 'task';
+
+    var del = document.createElement('button');
+    del.className = 'todo-delete';
+    del.textContent = '✕';
+    del.onclick = function() { deleteTodo(t.id); };
+
+    li.appendChild(btn);
+    li.appendChild(txt);
+    li.appendChild(tag);
+    li.appendChild(del);
+    list.appendChild(li);
+  });
+
+  counter.textContent = doneCount + '/' + todos.length;
+}
+
+function toggleTodo(id, done) {
+  put('/api/todos/' + id, { done: done }).then(function(data) {
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].id === id) { todos[i].done = done ? 1 : 0; break; }
+    }
+    showXpToast(done ? 5 : -5);
+    currentUser.xp = data.xp;
+    renderTodos();
+    updateBars();
+  });
+}
+
+function deleteTodo(id) {
+  del('/api/todos/' + id).then(function() {
+    todos = todos.filter(function(t) { return t.id !== id; });
+    renderTodos();
+  });
+}
+
+document.getElementById('todoAddBtn').onclick = function() { addTodo(); };
+document.getElementById('todoInput').onkeydown = function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addTodo(); }
+};
+
+function addTodo() {
+  var input = document.getElementById('todoInput');
+  var text = input.value.trim();
+  if (!text) return;
+  post('/api/todos', { text: text, date: todayStr() }).then(function(data) {
+    todos.push(data.todo);
+    input.value = '';
+    renderTodos();
+  });
+}
+
 // =========== RENDER ALL ===========
 
+function updateWeekCounter() {
+  var weeks = getSemesterWeeks();
+  if (!weeks.length) {
+    document.getElementById('currentWeek').textContent = '—';
+    document.getElementById('totalWeeks').textContent = '—';
+    return;
+  }
+  document.getElementById('totalWeeks').textContent = weeks.length;
+  var found = false;
+  for (var i = 0; i < weeks.length; i++) {
+    if (isCurrentWeek(weeks[i])) {
+      document.getElementById('currentWeek').textContent = weeks[i].num;
+      found = true;
+      break;
+    }
+  }
+  if (!found) document.getElementById('currentWeek').textContent = '—';
+}
+
 function renderAll() {
+  updateWeekCounter();
   if (currentMapView === 'weekly') {
     renderWeeklyMap();
   } else {
     renderWeekGrid();
   }
+  renderGetStarted();
+  renderSyllabusImport();
+  renderTodos();
   renderQuests();
   renderBossFights();
   renderAchievements();
+  renderCheckinLog();
   updateBars();
 }

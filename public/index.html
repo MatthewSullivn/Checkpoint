@@ -111,6 +111,71 @@
         </div>
       </div>
 
+      <!-- GET STARTED BOX -->
+      <div id="getStartedBox" class="card get-started hidden">
+        <div class="card-header">
+          <h3>Get Started</h3>
+          <button class="modal-close" id="dismissGetStarted">&times;</button>
+        </div>
+        <div class="card-body">
+          <p class="get-started-intro">Welcome to Checkpoint! Set up your semester in 3 easy steps:</p>
+          <div class="get-started-steps">
+            <div class="gs-step" id="gsStep1">
+              <div class="gs-num">1</div>
+              <div class="gs-content">
+                <strong>Set Semester Dates</strong>
+                <p>Tell us when your semester starts and ends so we can map out your journey.</p>
+                <button class="btn-sm" id="gsSetupBtn">Open Setup</button>
+              </div>
+            </div>
+            <div class="gs-step" id="gsStep2">
+              <div class="gs-num">2</div>
+              <div class="gs-content">
+                <strong>Import Your Courses</strong>
+                <p>Upload your Banner PDF, paste a syllabus, or manually add your classes and deadlines.</p>
+                <button class="btn-sm" id="gsImportBtn">Import Courses</button>
+              </div>
+            </div>
+            <div class="gs-step" id="gsStep3">
+              <div class="gs-num">3</div>
+              <div class="gs-content">
+                <strong>Daily Check-In</strong>
+                <p>Log your sleep, stress, and exercise to track your HP and stay healthy.</p>
+                <button class="btn-sm" id="gsCheckinBtn">Check In</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SYLLABUS IMPORT (shown after courses exist) -->
+      <div id="syllabusImportCard" class="card hidden">
+        <div class="card-header">
+          <h3>Quick Syllabus Import</h3>
+          <button class="btn-sm" id="syllabusCollapseBtn">Collapse</button>
+        </div>
+        <div class="card-body" id="syllabusImportBody">
+          <p class="syllabus-hint">Paste dates from your syllabus to quickly add deadlines to your courses.</p>
+          <div class="syllabus-row">
+            <select id="syllabusCourseSelect" class="syllabus-select">
+              <option value="">Select course...</option>
+            </select>
+          </div>
+          <textarea id="syllabusInlineText" rows="4" placeholder="Paste syllabus dates here...&#10;e.g. Midterm - March 15&#10;Assignment 3 - Feb 20&#10;Final Exam - April 10"></textarea>
+          <div class="syllabus-actions">
+            <button class="btn-sm" id="syllabusInlineParse">Parse Dates</button>
+          </div>
+          <div id="syllabusInlinePreview" class="preview hidden">
+            <h4>Found:</h4>
+            <ul id="syllabusInlineList"></ul>
+            <div class="preview-actions">
+              <button class="btn-primary" id="syllabusInlineImport">Import All</button>
+              <button class="btn-sm btn-ghost" id="syllabusInlineClear">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="grid-2">
         <div class="stack">
           <div class="card">
@@ -138,9 +203,34 @@
               <div id="achievementGrid"></div>
             </div>
           </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Check-In Log</h3>
+              <span class="badge" id="streakBadge">0 day streak</span>
+            </div>
+            <div class="card-body">
+              <div id="checkinLog"></div>
+              <p id="noCheckins" class="empty-state">No check-ins yet — log your first day!</p>
+            </div>
+          </div>
         </div>
 
         <div class="stack">
+          <!-- DAILY TODOS -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Today's Tasks</h3>
+              <span class="badge" id="todoCounter">0</span>
+            </div>
+            <div class="card-body">
+              <div class="todo-add-row">
+                <input type="text" id="todoInput" placeholder="Add a task for today..." class="todo-input">
+                <button class="btn-sm" id="todoAddBtn">+</button>
+              </div>
+              <ul id="todoList" class="quest-list"></ul>
+              <p id="noTodos" class="empty-state">No tasks yet — add one above!</p>
+            </div>
+          </div>
           <div class="card">
             <div class="card-header">
               <h3>Today's Quests</h3>
@@ -309,6 +399,7 @@
     </div>
   </div>
 
+  <div id="xpToast" class="xp-toast"></div>
   <script src="app.js"></script>
 </body>
 </html>

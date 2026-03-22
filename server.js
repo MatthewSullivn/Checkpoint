@@ -15,7 +15,10 @@ var app = express();
 var PORT = process.env.PORT || 3000;
 
 // database
-var db = new Database(path.join(__dirname, 'db', 'checkpoint.db'));
+var fs = require('fs');
+var dbDir = path.join(__dirname, 'db');
+if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+var db = new Database(path.join(dbDir, 'checkpoint.db'));
 db.pragma('journal_mode = WAL');
 
 db.exec(`
@@ -77,6 +80,16 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id),
     UNIQUE(user_id, achievement_id)
   );
+
+  CREATE TABLE IF NOT EXISTS todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    text TEXT NOT NULL,
+    done INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 // middleware
@@ -97,6 +110,7 @@ if (!secretRow) {
 // and don't leak memory like the default MemoryStore.
 // FIX 6: secure cookie flags — httpOnly blocks XSS cookie theft,
 // sameSite blocks CSRF, secure enforces HTTPS in production.
+app.set('trust proxy', 1);
 app.use(session({
   store: new SqliteStore({ client: db, expired: { clear: true, intervalMs: 900000 } }),
   secret: secretRow.value,
@@ -105,7 +119,7 @@ app.use(session({
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production'
   }
 }));
@@ -468,6 +482,59 @@ function bannerDate(str) {
   var parts = str.split('/');
   return parts[2] + '-' + parts[0] + '-' + parts[1];
 }
+
+// ============ TODOS ============
+
+app.get('/api/todos', requireLogin, function(req, res) {
+  var uid = req.session.userId;
+  var date = req.query.date || '';
+  var rows;
+  if (date) {
+    rows = db.prepare('SELECT * FROM todos WHERE user_id = ? AND date = ? ORDER BY created_at').all(uid, date);
+  } else {
+    rows = db.prepare('SELECT * FROM todos WHERE user_id = ? ORDER BY date, created_at').all(uid);
+  }
+  res.json({ todos: rows });
+});
+
+app.post('/api/todos', requireLogin, function(req, res) {
+  var uid = req.session.userId;
+  var text = (req.body.text || '').trim();
+  var date = req.body.date || '';
+  if (!text || !date) return res.status(400).json({ error: 'text and date required' });
+
+  var result = db.prepare('INSERT INTO todos (user_id, date, text) VALUES (?, ?, ?)').run(uid, date, text);
+  var todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(result.lastInsertRowid);
+  res.json({ todo: todo });
+});
+
+app.put('/api/todos/:id', requireLogin, function(req, res) {
+  var uid = req.session.userId;
+  var todo = db.prepare('SELECT * FROM todos WHERE id = ? AND user_id = ?').get(req.params.id, uid);
+  if (!todo) return res.status(404).json({ error: 'not found' });
+
+  var done = req.body.done !== undefined ? (req.body.done ? 1 : 0) : todo.done;
+  var text = req.body.text !== undefined ? req.body.text.trim() : todo.text;
+  db.prepare('UPDATE todos SET done = ?, text = ? WHERE id = ?').run(done, text, todo.id);
+
+  // award/remove XP for completing todos
+  var user = db.prepare('SELECT xp FROM users WHERE id = ?').get(uid);
+  if (req.body.done !== undefined) {
+    var newXp = req.body.done ? user.xp + 5 : Math.max(0, user.xp - 5);
+    db.prepare('UPDATE users SET xp = ? WHERE id = ?').run(newXp, uid);
+    res.json({ ok: true, xp: newXp });
+  } else {
+    res.json({ ok: true, xp: user.xp });
+  }
+});
+
+app.delete('/api/todos/:id', requireLogin, function(req, res) {
+  var uid = req.session.userId;
+  var todo = db.prepare('SELECT * FROM todos WHERE id = ? AND user_id = ?').get(req.params.id, uid);
+  if (!todo) return res.status(404).json({ error: 'not found' });
+  db.prepare('DELETE FROM todos WHERE id = ?').run(todo.id);
+  res.json({ ok: true });
+});
 
 // serve the app for all other routes
 app.get('/{*splat}', function(req, res) {

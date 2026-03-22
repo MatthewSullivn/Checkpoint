@@ -634,17 +634,26 @@ input[type="range"] {
 .day-tooltip {
   display: none;
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--black);
   color: var(--white);
-  padding: 8px 12px;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  white-space: nowrap;
+  padding: 10px 14px;
+  width: 220px;
   z-index: 10;
   pointer-events: none;
+  border: 2px solid var(--border);
+}
+
+.day-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--black);
 }
 
 .day-tile:hover .day-tooltip { display: block; }
@@ -826,19 +835,83 @@ input[type="range"] {
 .week-tooltip {
   display: none;
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--black);
   color: var(--white);
-  padding: 8px 12px;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  white-space: nowrap;
+  padding: 10px 14px;
+  width: 230px;
   z-index: 10;
   pointer-events: none;
+  border: 2px solid var(--border);
 }
+
+.week-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--black);
+}
+
 .week-tile:hover .week-tooltip { display: block; }
+
+/* ========== SHARED TOOLTIP CONTENT ========== */
+
+.tip-header {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  color: var(--white);
+}
+
+.tip-dates {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+.tip-intensity {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.tip-intensity.chill { color: var(--chill); }
+.tip-intensity.moderate { color: var(--moderate); }
+.tip-intensity.intense { color: var(--intense); }
+.tip-intensity.boss { color: var(--boss); }
+
+.tip-section {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ccc;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.tip-item {
+  font-size: 0.7rem;
+  color: #ddd;
+  padding: 2px 0;
+  line-height: 1.3;
+}
+
+.tip-empty {
+  font-size: 0.7rem;
+  color: #666;
+  font-style: italic;
+}
 
 /* ========== QUESTS ========== */
 
@@ -932,6 +1005,7 @@ input[type="range"] {
   border: 2px solid var(--border);
   background: var(--white);
   transition: all 0.15s;
+  position: relative;
 }
 
 .ach-icon { font-size: 1.3rem; display: block; margin-bottom: 4px; }
@@ -944,13 +1018,91 @@ input[type="range"] {
   color: var(--text3);
 }
 
-.achievement.locked { opacity: 0.2; filter: grayscale(1); }
+.achievement.locked { opacity: 0.35; filter: grayscale(1); }
+.achievement.locked:hover { opacity: 0.8; filter: none; }
 
 .achievement.unlocked {
   border-color: var(--gold);
   box-shadow: 3px 3px 0 var(--gold);
 }
 .achievement.unlocked .ach-name { color: var(--text); }
+
+/* achievement tooltip */
+.ach-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--black);
+  color: var(--white);
+  padding: 12px 14px;
+  width: 200px;
+  z-index: 20;
+  text-align: left;
+  border: 2px solid var(--border);
+}
+
+.achievement:hover .ach-tooltip { display: block; }
+
+.ach-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--black);
+}
+
+.ach-tooltip-title {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  color: var(--gold);
+}
+
+.ach-tooltip-desc {
+  font-size: 0.75rem;
+  color: #ccc;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.ach-tooltip-how {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  font-style: italic;
+}
+
+.ach-tooltip-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #333;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+
+.ach-tooltip-progress-fill {
+  height: 100%;
+  background: var(--xp);
+  transition: width 0.3s ease;
+}
+
+.ach-tooltip-status {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text3);
+}
+
+.ach-unlocked-status {
+  color: var(--xp) !important;
+}
 
 /* ========== MODALS ========== */
 
@@ -1188,6 +1340,202 @@ input[type="range"] {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: #ccc; }
 
+/* ========== GET STARTED ========== */
+
+.get-started { margin-bottom: 24px; }
+
+.get-started-intro {
+  font-size: 0.9rem;
+  color: var(--text2);
+  margin-bottom: 16px;
+}
+
+.get-started-steps {
+  display: flex;
+  gap: 16px;
+}
+
+.gs-step {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #eee;
+  background: var(--bg);
+  transition: all 0.15s;
+}
+
+.gs-step.gs-done {
+  border-color: var(--chill);
+  background: #dcfce7;
+}
+
+.gs-step.gs-done .gs-num {
+  background: var(--chill);
+  color: var(--white);
+}
+
+.gs-num {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.gs-content strong {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.gs-content p {
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+/* ========== SYLLABUS IMPORT ========== */
+
+#syllabusImportCard { margin-bottom: 24px; }
+
+.syllabus-hint {
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+
+.syllabus-row { margin-bottom: 10px; }
+
+.syllabus-select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--sans);
+}
+
+.syllabus-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+/* ========== DAILY TODOS ========== */
+
+.todo-add-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.todo-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  background: var(--white);
+  font-size: 0.85rem;
+  font-family: var(--sans);
+  color: var(--text);
+}
+
+.todo-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.todo-delete {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  transition: color 0.15s;
+}
+.todo-delete:hover { color: var(--hp); }
+
+/* ========== CHECK-IN LOG ========== */
+
+.checkin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 2px solid #eee;
+  font-size: 0.8rem;
+}
+.checkin-row:last-child { border-bottom: none; }
+
+.checkin-date {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text3);
+  min-width: 55px;
+}
+
+.checkin-stats {
+  display: flex;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.checkin-stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.checkin-hp {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 2px solid;
+}
+
+.checkin-hp.hp-high { color: #166534; border-color: var(--chill); background: #dcfce7; }
+.checkin-hp.hp-mid { color: #854d0e; border-color: var(--moderate); background: #fef9c3; }
+.checkin-hp.hp-low { color: #9f1239; border-color: var(--boss); background: #ffe4e6; }
+
+/* ========== XP TOAST ========== */
+
+.xp-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--black);
+  color: var(--xp);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 20px;
+  border: 2px solid var(--xp);
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.xp-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ========== RESPONSIVE ========== */
 
 @media (max-width: 768px) {
@@ -1201,4 +1549,5 @@ input[type="range"] {
   #achievementGrid { grid-template-columns: repeat(3, 1fr); }
   .daily-grid { grid-template-columns: repeat(4, 1fr); }
   .map-tabs { flex-wrap: wrap; }
+  .get-started-steps { flex-direction: column; }
 }
