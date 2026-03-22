@@ -9,6 +9,7 @@ var checkins = [];
 var completedQuests = [];
 var achievements = [];
 var currentMapView = 'weekly';
+var selectedDay = null;
 
 // =========== API HELPERS ===========
 
@@ -279,6 +280,9 @@ function renderWeekGrid() {
 function renderWeeklyMap() {
   var container = document.getElementById('weeklyMapView');
   container.innerHTML = '';
+  var detail = document.getElementById('dayDetail');
+  detail.classList.add('hidden');
+  detail.innerHTML = '';
 
   var weekStart = getCurrentCalendarWeekStart();
   var dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -297,26 +301,90 @@ function renderWeeklyMap() {
     var deadlines = getDayDeadlines(dateStr);
     var isToday = dateStr === todayDateStr;
 
-    var tipText = dayNames[i] + ', ' + formatDate(dateStr);
-    if (deadlines.length)
-      tipText += ': ' + deadlines.map(function(d) { return d.course + ' — ' + d.label; }).join(', ');
-
     var tile = document.createElement('div');
     tile.className = 'day-tile ' + cls;
     if (isToday) tile.classList.add('today');
+    if (dateStr === selectedDay) tile.classList.add('selected');
 
     var sublabel = deadlines.length ? deadlines.length + (deadlines.length === 1 ? ' due' : ' due') : cls;
 
     tile.innerHTML =
       '<span class="dname">' + dayNames[i] + '</span>' +
       '<span class="ddate">' + pad(day.getDate()) + '</span>' +
-      '<span class="dlabel">' + sublabel + '</span>' +
-      '<div class="day-tooltip">' + tipText + '</div>';
+      '<span class="dlabel">' + sublabel + '</span>';
+
+    tile.setAttribute('data-date', dateStr);
+    tile.setAttribute('data-dayname', dayNames[i]);
+    tile.onclick = function() {
+      var clickedDate = this.getAttribute('data-date');
+      var clickedName = this.getAttribute('data-dayname');
+
+      // toggle off if clicking the same day
+      if (selectedDay === clickedDate) {
+        selectedDay = null;
+        renderWeeklyMap();
+        return;
+      }
+      selectedDay = clickedDate;
+      renderWeeklyMap();
+      showDayDetail(clickedDate, clickedName);
+    };
 
     grid.appendChild(tile);
   }
 
   container.appendChild(grid);
+
+  // re-show detail if a day is selected
+  if (selectedDay) {
+    var selDayObj = new Date(selectedDay + 'T00:00:00');
+    var dayIdx = selDayObj.getDay();
+    var names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    showDayDetail(selectedDay, names[dayIdx]);
+  }
+}
+
+function showDayDetail(dateStr, dayName) {
+  var detail = document.getElementById('dayDetail');
+  var deadlines = getDayDeadlines(dateStr);
+  var load = getDayLoad(dateStr);
+  var cls = classifyDay(load);
+
+  var html = '<div class="day-detail-header">';
+  html += '<div class="day-detail-title">';
+  html += '<span class="day-detail-name">' + dayName + ', ' + formatDate(dateStr) + '</span>';
+  html += '<span class="day-detail-badge ' + cls + '">' + cls + '</span>';
+  html += '</div>';
+  html += '<button class="day-detail-close" id="closeDayDetail">&times;</button>';
+  html += '</div>';
+
+  if (deadlines.length) {
+    html += '<ul class="day-detail-list">';
+    deadlines.forEach(function(dl) {
+      var icon = dl.type === 'exam' ? '☠' : dl.type === 'project' ? '⚔' : '📝';
+      html += '<li>';
+      html += '<span class="day-dl-icon">' + icon + '</span>';
+      html += '<span class="day-dl-text">' + dl.course + ' — ' + dl.label + '</span>';
+      html += '<span class="day-dl-type ' + dl.type + '">' + dl.type + '</span>';
+      html += '</li>';
+    });
+    html += '</ul>';
+  } else {
+    html += '<p class="day-detail-empty">No deadlines — chill day.</p>';
+  }
+
+  detail.innerHTML = html;
+  detail.classList.remove('hidden');
+
+  document.getElementById('closeDayDetail').onclick = function() {
+    selectedDay = null;
+    detail.classList.add('hidden');
+    detail.innerHTML = '';
+    // remove selected class from tiles
+    document.querySelectorAll('.day-tile.selected').forEach(function(t) {
+      t.classList.remove('selected');
+    });
+  };
 }
 
 function renderQuests() {
@@ -530,10 +598,12 @@ document.getElementById('weeklyMapBtn').onclick = function() {
 
 document.getElementById('semesterMapBtn').onclick = function() {
   currentMapView = 'semester';
+  selectedDay = null;
   document.getElementById('semesterMapBtn').classList.add('active');
   document.getElementById('weeklyMapBtn').classList.remove('active');
   document.getElementById('weekGrid').classList.remove('hidden');
   document.getElementById('weeklyMapView').classList.add('hidden');
+  document.getElementById('dayDetail').classList.add('hidden');
   renderWeekGrid();
 };
 
