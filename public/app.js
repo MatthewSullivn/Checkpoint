@@ -592,69 +592,70 @@ document.querySelectorAll('.tabs .tab').forEach(function(tab) {
   };
 });
 
-// ics
-var dropZone = document.getElementById('dropZone');
-var icsInput = document.getElementById('icsFileInput');
-var parsedIcs = [];
+// banner pdf
+var bannerDrop = document.getElementById('bannerDropZone');
+var bannerInput = document.getElementById('bannerFileInput');
 
-dropZone.ondragover = function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); };
-dropZone.ondragleave = function() { dropZone.classList.remove('drag-over'); };
-dropZone.ondrop = function(e) {
-  e.preventDefault(); dropZone.classList.remove('drag-over');
-  if (e.dataTransfer.files[0]) readIcsFile(e.dataTransfer.files[0]);
+bannerDrop.ondragover = function(e) { e.preventDefault(); bannerDrop.classList.add('drag-over'); };
+bannerDrop.ondragleave = function() { bannerDrop.classList.remove('drag-over'); };
+bannerDrop.ondrop = function(e) {
+  e.preventDefault(); bannerDrop.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) uploadBanner(e.dataTransfer.files[0]);
 };
-icsInput.onchange = function() { if (this.files[0]) readIcsFile(this.files[0]); };
+bannerInput.onchange = function() { if (this.files[0]) uploadBanner(this.files[0]); };
 
-function readIcsFile(file) {
-  var reader = new FileReader();
-  reader.onload = function(e) { parsedIcs = parseICS(e.target.result); showIcsPreview(); };
-  reader.readAsText(file);
+function uploadBanner(file) {
+  var errEl = document.getElementById('bannerError');
+  errEl.textContent = '';
+
+  var formData = new FormData();
+  formData.append('pdf', file);
+
+  fetch('/api/import/banner', {
+    method: 'POST',
+    body: formData
+  }).then(function(r) {
+    return r.json().then(function(data) {
+      if (!r.ok) throw new Error(data.error || 'upload failed');
+      return data;
+    });
+  }).then(function(data) {
+    showBannerPreview(data);
+  }).catch(function(err) {
+    errEl.textContent = err.message;
+  });
 }
 
-function parseICS(text) {
-  var events = [], lines = text.replace(/\r\n /g, '').split(/\r?\n/);
-  var inEv = false, ev = {};
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    if (line === 'BEGIN:VEVENT') { inEv = true; ev = {}; }
-    else if (line === 'END:VEVENT') { inEv = false; if (ev.summary && ev.date) events.push(ev); }
-    else if (inEv) {
-      if (line.indexOf('SUMMARY') === 0) ev.summary = line.split(':').slice(1).join(':');
-      else if (line.indexOf('DTSTART') === 0) {
-        var val = line.split(':').pop();
-        ev.date = val.substring(0,4)+'-'+val.substring(4,6)+'-'+val.substring(6,8);
-      }
-    }
-  }
-  return events;
-}
+function showBannerPreview(data) {
+  var el = document.getElementById('bannerPreview');
+  var list = document.getElementById('bannerCourseList');
+  var dates = document.getElementById('bannerSemDates');
 
-function showIcsPreview() {
-  var el = document.getElementById('icsPreview');
-  var list = document.getElementById('icsEventList');
-  if (!parsedIcs.length) { el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
   list.innerHTML = '';
-  parsedIcs.forEach(function(ev) {
+
+  data.courses.forEach(function(c) {
     var li = document.createElement('li');
-    li.innerHTML = '<span>' + ev.summary + '</span><span class="ev-date">' + formatDate(ev.date) + '</span>';
+    var stars = '';
+    for (var i = 0; i < c.difficulty; i++) stars += '★';
+    li.innerHTML = '<span>' + c.name + '</span><span class="ev-date">' + stars + ' ' + c.credits + ' cr</span>';
     list.appendChild(li);
   });
+
+  if (data.semStart && data.semEnd) {
+    dates.textContent = 'Semester: ' + data.semStart + ' to ' + data.semEnd;
+  }
 }
 
-document.getElementById('icsImportConfirm').onclick = function() {
-  var events = parsedIcs.map(function(ev) { return { label: ev.summary, date: ev.date, type: guessType(ev.summary) }; });
-  post('/api/import', { events: events }).then(function() {
-    parsedIcs = [];
-    document.getElementById('icsPreview').classList.add('hidden');
-    closeModal('importModal');
-    loadAll();
-  });
+document.getElementById('bannerImportConfirm').onclick = function() {
+  // already imported server-side, just reload
+  document.getElementById('bannerPreview').classList.add('hidden');
+  closeModal('importModal');
+  loadAll();
 };
 
-document.getElementById('icsClear').onclick = function() {
-  parsedIcs = [];
-  document.getElementById('icsPreview').classList.add('hidden');
+document.getElementById('bannerClear').onclick = function() {
+  document.getElementById('bannerPreview').classList.add('hidden');
 };
 
 // paste syllabus

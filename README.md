@@ -32,4 +32,4 @@ Opens on http://localhost:3000
 
 ## Team
 
-Matthew Sullivan and collaborator. Built in 6 hours at Dalhousie University.
+Matthew Sullivan and Rithvik Balavikram.

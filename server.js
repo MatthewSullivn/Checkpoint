@@ -3,6 +3,10 @@ var session = require('express-session');
 var bcrypt = require('bcryptjs');
 var Database = require('better-sqlite3');
 var path = require('path');
+var multer = require('multer');
+var { PDFParse } = require('pdf-parse');
+
+var upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -297,6 +301,118 @@ app.post('/api/import', requireLogin, function(req, res) {
 
   res.json({ ok: true, courseId: course.id });
 });
+
+// ============ BANNER PDF IMPORT ============
+
+app.post('/api/import/banner', requireLogin, upload.single('pdf'), function(req, res) {
+  if (!req.file) return res.status(400).json({ error: 'no file uploaded' });
+
+  var uid = req.session.userId;
+  var arr = new Uint8Array(req.file.buffer);
+  var parser = new PDFParse(arr);
+
+  parser.load().then(function() {
+    return parser.getText();
+  }).then(function(result) {
+    var text = '';
+    result.pages.forEach(function(p) { text += p.text + '\n'; });
+    var parsed = parseBannerText(text);
+
+    // auto-set semester dates
+    if (parsed.semStart && parsed.semEnd) {
+      db.prepare('UPDATE users SET sem_start = ?, sem_end = ? WHERE id = ?')
+        .run(parsed.semStart, parsed.semEnd, uid);
+    }
+
+    // insert courses
+    var insertCourse = db.prepare('INSERT INTO courses (user_id, name, difficulty) VALUES (?, ?, ?)');
+    var insertDl = db.prepare('INSERT INTO deadlines (course_id, label, date, type) VALUES (?, ?, ?, ?)');
+
+    parsed.courses.forEach(function(c) {
+      // skip if course already exists for this user
+      var existing = db.prepare('SELECT id FROM courses WHERE user_id = ? AND name = ?').get(uid, c.name);
+      if (existing) return;
+
+      var result = insertCourse.run(uid, c.name, c.difficulty);
+      var courseId = result.lastInsertRowid;
+
+      // add class schedule as recurring context (first and last class as deadlines)
+      if (c.startDate && c.endDate) {
+        insertDl.run(courseId, 'First class', c.startDate, 'assignment');
+        insertDl.run(courseId, 'Last class', c.endDate, 'assignment');
+      }
+    });
+
+    res.json({
+      ok: true,
+      courses: parsed.courses,
+      semStart: parsed.semStart,
+      semEnd: parsed.semEnd
+    });
+  }).catch(function(err) {
+    res.status(400).json({ error: 'could not parse PDF: ' + err.message });
+  });
+});
+
+function parseBannerText(text) {
+  var courses = [];
+  var semStart = null;
+  var semEnd = null;
+  var lines = text.split('\n');
+
+  // pattern: "Course Title \tCSCI 2100 01 3.0 \t20743 01/07/2026 - 04/07/2026"
+  // we look for lines containing a course code pattern and date range
+  var coursePattern = /^(.+?)\t([A-Z]{4}\s+\d{4})\s+(\S+)\s+([\d.]+)\s+\t\d+\s+(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/;
+
+  var seen = {};
+  for (var i = 0; i < lines.length; i++) {
+    var match = lines[i].match(coursePattern);
+    if (!match) continue;
+
+    var title = match[1].trim();
+    var code = match[2].trim();
+    var credits = parseFloat(match[4]);
+    var start = bannerDate(match[5]);
+    var end = bannerDate(match[6]);
+
+    // skip 0-credit sections (tutorials/labs that duplicate the main course)
+    if (credits === 0) continue;
+
+    // deduplicate by course code
+    if (seen[code]) continue;
+    seen[code] = true;
+
+    // track overall semester bounds
+    if (!semStart || start < semStart) semStart = start;
+    if (!semEnd || end > semEnd) semEnd = end;
+
+    // guess difficulty from credit hours and course level
+    var level = parseInt(code.split(' ')[1]) || 2000;
+    var diff = 3;
+    if (level >= 4000) diff = 5;
+    else if (level >= 3000) diff = 4;
+    else if (level >= 2000) diff = 3;
+    else diff = 2;
+
+    courses.push({
+      name: code + ' - ' + title,
+      code: code,
+      title: title,
+      credits: credits,
+      difficulty: diff,
+      startDate: start,
+      endDate: end
+    });
+  }
+
+  return { courses: courses, semStart: semStart, semEnd: semEnd };
+}
+
+function bannerDate(str) {
+  // converts "01/07/2026" to "2026-01-07"
+  var parts = str.split('/');
+  return parts[2] + '-' + parts[0] + '-' + parts[1];
+}
 
 // serve the app for all other routes
 app.get('/{*splat}', function(req, res) {

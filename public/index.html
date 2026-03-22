@@ -261,25 +261,27 @@
       </div>
       <div class="modal-body">
         <div class="tabs">
-          <button class="tab active" data-tab="ics">ICS File</button>
+          <button class="tab active" data-tab="banner">Banner PDF</button>
           <button class="tab" data-tab="paste">Paste Syllabus</button>
           <button class="tab" data-tab="manual">Quick Add</button>
         </div>
-        <div class="tab-panel active" id="tab-ics">
-          <div class="dropzone" id="dropZone">
-            <div class="dropzone-icon">📁</div>
-            <p>Drag & drop .ics file here</p>
-            <span class="dropzone-or">or</span>
-            <label class="btn-sm file-pick">Browse <input type="file" id="icsFileInput" accept=".ics" hidden></label>
+        <div class="tab-panel active" id="tab-banner">
+          <div class="dropzone" id="bannerDropZone">
+            <div class="dropzone-icon">📄</div>
+            <p>Drag & drop your Banner schedule PDF</p>
+            <span class="dropzone-or">Export from Dal Self-Service Banner, then upload here</span>
+            <label class="btn-sm file-pick" style="margin-top:8px">Browse <input type="file" id="bannerFileInput" accept=".pdf" hidden></label>
           </div>
-          <div id="icsPreview" class="preview hidden">
-            <h4>Found Events:</h4>
-            <ul id="icsEventList"></ul>
+          <div id="bannerPreview" class="preview hidden">
+            <h4>Found Courses:</h4>
+            <ul id="bannerCourseList"></ul>
+            <p id="bannerSemDates" style="margin-top:8px;font-size:0.8rem"></p>
             <div class="preview-actions">
-              <button class="btn-primary" id="icsImportConfirm">Import All</button>
-              <button class="btn-sm btn-ghost" id="icsClear">Clear</button>
+              <button class="btn-primary" id="bannerImportConfirm">Import All</button>
+              <button class="btn-sm btn-ghost" id="bannerClear">Clear</button>
             </div>
           </div>
+          <div id="bannerError" class="auth-error" style="margin-top:8px"></div>
         </div>
         <div class="tab-panel" id="tab-paste">
           <textarea id="syllabusText" rows="6" placeholder="Paste your syllabus dates here...&#10;e.g. CSCI 2110 - Midterm - March 15&#10;MATH 1000 - Assignment 3 - Feb 20"></textarea>
