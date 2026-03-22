@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autopilot — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+  <!-- top HUD -->
+  <nav class="topbar hud-bar">
+    <div class="topbar-left">
+      <a href="/dashboard" class="nav-logo">
+        <span class="logo-square">&#9632;</span>
+        AUTOPILOT
+        <span class="logo-square">&#9632;</span>
+      </a>
+      <span class="week-badge">WEEK <span id="currentWeek">-</span></span>
+    </div>
+    <div class="hud-stats">
+      <div class="stat-bar">
+        <span class="stat-label">HP</span>
+        <div class="bar-track">
+          <div class="bar-fill hp-fill" id="hpBar" style="width: 100%"></div>
+        </div>
+        <span class="stat-val" id="hpVal">100</span>
+      </div>
+      <div class="stat-bar">
+        <span class="stat-label">XP</span>
+        <div class="bar-track">
+          <div class="bar-fill xp-fill" id="xpBar" style="width: 0%"></div>
+        </div>
+        <span class="stat-val" id="xpVal">0</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="nav-btn" id="checkinBtn">&#9632; CHECK-IN</button>
+      <button class="nav-btn" id="settingsBtn">&#9881;</button>
+      <button class="nav-btn" id="logoutBtn">&#9632; EXIT</button>
+    </div>
+  </nav>
+
+  <!-- tab navigation -->
+  <div class="tab-bar">
+    <button class="tab active" data-tab="map">&#9763; SEMESTER MAP</button>
+    <button class="tab" data-tab="quests">&#9876; TODAY'S QUESTS</button>
+    <button class="tab" data-tab="character">&#9733; CHARACTER</button>
+  </div>
+
+  <!-- main content area -->
+  <main class="dash-main">
+
+    <!-- SEMESTER MAP tab -->
+    <section class="tab-panel active" id="panel-map">
+      <div class="panel-header">
+        <h2>&#9632; SEMESTER MAP &#9632;</h2>
+        <p class="panel-sub">your 14-week battlefield, color-coded by intensity</p>
+      </div>
+
+      <div class="week-grid" id="weekGrid">
+        <p class="empty-state">SET UP YOUR SEMESTER TO SEE THE MAP &#9881;</p>
+      </div>
+
+      <div class="map-legend">
+        <span class="legend-item"><span class="legend-dot chill"></span> CHILL</span>
+        <span class="legend-item"><span class="legend-dot moderate"></span> MODERATE</span>
+        <span class="legend-item"><span class="legend-dot intense"></span> INTENSE</span>
+        <span class="legend-item"><span class="legend-dot boss"></span> BOSS FIGHT</span>
+      </div>
+
+      <div class="boss-list-section">
+        <h3>&#9760; UPCOMING BOSS FIGHTS</h3>
+        <div id="bossList">
+          <p class="empty-state">NO BOSS FIGHTS ON THE HORIZON</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TODAY'S QUESTS tab -->
+    <section class="tab-panel" id="panel-quests">
+      <div class="panel-header">
+        <h2>&#9632; TODAY'S QUESTS &#9632;</h2>
+        <p class="panel-sub">complete missions, earn xp, stay alive</p>
+      </div>
+
+      <div class="stress-meter">
+        <div class="meter-item">
+          <span class="meter-label">STRESS</span>
+          <div class="bar-track wide">
+            <div class="bar-fill stress-fill" id="stressBar" style="width: 30%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quest-list" id="questList">
+        <p class="empty-state">ADD COURSES TO BEGIN YOUR ADVENTURE</p>
+      </div>
+    </section>
+
+    <!-- CHARACTER SHEET tab -->
+    <section class="tab-panel" id="panel-character">
+      <div class="panel-header">
+        <h2>&#9632; CHARACTER SHEET &#9632;</h2>
+        <p class="panel-sub">your stats, your story</p>
+      </div>
+
+      <div class="char-stats">
+        <div class="char-stat-card">
+          <div class="card-corner tl"></div>
+          <div class="card-corner tr"></div>
+          <div class="card-corner bl"></div>
+          <div class="card-corner br"></div>
+          <span class="char-stat-icon">&#9829;</span>
+          <span class="char-stat-val" id="charHP">100</span>
+          <span class="char-stat-name">HP</span>
+        </div>
+        <div class="char-stat-card">
+          <div class="card-corner tl"></div>
+          <div class="card-corner tr"></div>
+          <div class="card-corner bl"></div>
+          <div class="card-corner br"></div>
+          <span class="char-stat-icon">&#9733;</span>
+          <span class="char-stat-val" id="charXP">0</span>
+          <span class="char-stat-name">TOTAL XP</span>
+        </div>
+        <div class="char-stat-card">
+          <div class="card-corner tl"></div>
+          <div class="card-corner tr"></div>
+          <div class="card-corner bl"></div>
+          <div class="card-corner br"></div>
+          <span class="char-stat-icon">&#128293;</span>
+          <span class="char-stat-val" id="charStreak">0</span>
+          <span class="char-stat-name">DAY STREAK</span>
+        </div>
+        <div class="char-stat-card">
+          <div class="card-corner tl"></div>
+          <div class="card-corner tr"></div>
+          <div class="card-corner bl"></div>
+          <div class="card-corner br"></div>
+          <span class="char-stat-icon">&#9876;</span>
+          <span class="char-stat-val" id="charQuests">0</span>
+          <span class="char-stat-name">QUESTS DONE</span>
+        </div>
+      </div>
+
+      <div class="burnout-section" id="burnoutSection">
+        <div class="burnout-badge safe" id="burnoutBadge">
+          <span class="burnout-label">BURNOUT RISK:</span>
+          <span class="burnout-level" id="burnoutLevel">LOW</span>
+        </div>
+      </div>
+
+      <div class="achievements-section">
+        <h3>&#9632; ACHIEVEMENTS &#9632;</h3>
+        <div class="achievement-grid" id="achievementGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: settings -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+      <div class="card-corner tl"></div>
+      <div class="card-corner tr"></div>
+      <div class="card-corner bl"></div>
+      <div class="card-corner br"></div>
+
+      <div class="modal-header">
+        <h2>&#9632; SEMESTER SETUP &#9632;</h2>
+        <button class="modal-close" id="closeSettings">&times;</button>
+      </div>
+
+      <form id="settingsForm">
+        <div class="field">
+          <label>SEMESTER START</label>
+          <input type="date" id="semStart">
+        </div>
+        <div class="field">
+          <label>SEMESTER END</label>
+          <input type="date" id="semEnd">
+        </div>
+        <div class="field">
+          <label>ENERGY TYPE</label>
+          <select id="energyType">
+            <option value="morning">MORNING PERSON</option>
+            <option value="night">NIGHT OWL</option>
+            <option value="afternoon">AFTERNOON WARRIOR</option>
+          </select>
+        </div>
+        <button type="submit" class="auth-submit">&#9632; SAVE &#9632;</button>
+      </form>
+
+      <div class="divider"></div>
+
+      <button class="add-course-btn" id="addCourseBtn">+ ADD COURSE</button>
+      <div id="courseListDisplay"></div>
+
+      <div class="divider"></div>
+      <button class="danger-btn" id="resetBtn">RESET EVERYTHING</button>
+    </div>
+  </div>
+
+  <!-- MODAL: add course -->
+  <div class="modal-overlay" id="courseModal">
+    <div class="modal-box">
+      <div class="card-corner tl"></div>
+      <div class="card-corner tr"></div>
+      <div class="card-corner bl"></div>
+      <div class="card-corner br"></div>
+
+      <div class="modal-header">
+        <h2>&#9632; ADD COURSE &#9632;</h2>
+        <button class="modal-close" id="closeCourse">&times;</button>
+      </div>
+
+      <form id="courseForm">
+        <div class="field">
+          <label>COURSE NAME</label>
+          <input type="text" id="courseName" placeholder="e.g. CSCI 2110" required>
+        </div>
+        <div class="field">
+          <label>DIFFICULTY (1-5)</label>
+          <div class="range-row">
+            <input type="range" id="courseDiff" min="1" max="5" value="3">
+            <span class="range-val" id="diffLabel">3</span>
+          </div>
+        </div>
+
+        <div class="deadlines-section">
+          <h3>DEADLINES</h3>
+          <div id="deadlineRows"></div>
+          <button type="button" class="small-btn" id="addDeadlineBtn">+ ADD DEADLINE</button>
+        </div>
+
+        <button type="submit" class="auth-submit">&#9632; SAVE COURSE &#9632;</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: daily check-in -->
+  <div class="modal-overlay" id="checkinModal">
+    <div class="modal-box">
+      <div class="card-corner tl"></div>
+      <div class="card-corner tr"></div>
+      <div class="card-corner bl"></div>
+      <div class="card-corner br"></div>
+
+      <div class="modal-header">
+        <h2>&#9632; DAILY CHECK-IN &#9632;</h2>
+        <button class="modal-close" id="closeCheckin">&times;</button>
+      </div>
+
+      <form id="checkinForm">
+        <div class="field">
+          <label>HOW'D YOU SLEEP? (1-5)</label>
+          <div class="range-row">
+            <input type="range" id="sleepScore" min="1" max="5" value="3">
+            <span class="range-val" id="sleepLabel">3</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>STRESS LEVEL (1-5)</label>
+          <div class="range-row">
+            <input type="range" id="stressScore" min="1" max="5" value="3">
+            <span class="range-val" id="stressLabel">3</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>EXERCISE TODAY?</label>
+          <select id="exerciseCheck">
+            <option value="no">NAH</option>
+            <option value="yes">YEAH!</option>
+          </select>
+        </div>
+        <button type="submit" class="auth-submit">&#9632; LOG IT &#9632;</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+
+</body>
+</html>

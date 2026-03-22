@@ -1,0 +1,793 @@
+/* dashboard styles */
+
+/* hud bar tweaks */
+.hud-bar {
+  gap: 16px;
+}
+
+.week-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--accent);
+  background: var(--bg);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  letter-spacing: 1px;
+}
+
+.hud-stats {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  max-width: 420px;
+  margin: 0 16px;
+}
+
+.stat-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  width: 20px;
+}
+
+.bar-track {
+  flex: 1;
+  height: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.bar-track.wide {
+  height: 18px;
+}
+
+.bar-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.hp-fill {
+  background: linear-gradient(90deg, var(--red), #f87171);
+  box-shadow: 0 0 6px var(--red-dim);
+}
+
+.xp-fill {
+  background: linear-gradient(90deg, var(--green), #4ade80);
+  box-shadow: 0 0 6px var(--green-dim);
+}
+
+.stress-fill {
+  background: linear-gradient(90deg, var(--orange), var(--red));
+  box-shadow: 0 0 6px var(--red-dim);
+}
+
+.stat-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  width: 32px;
+  text-align: right;
+}
+
+/* ==== TAB BAR ==== */
+
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  padding: 0 32px;
+  gap: 0;
+}
+
+.tab {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--white);
+}
+
+.tab.active {
+  color: var(--white);
+  border-bottom-color: var(--accent);
+}
+
+/* ==== MAIN AREA ==== */
+
+.dash-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.panel-header {
+  margin-bottom: 32px;
+}
+
+.panel-header h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--white);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+
+.panel-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+.empty-state {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 32px;
+  letter-spacing: 1px;
+}
+
+/* ==== WEEK GRID ==== */
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.week-tile {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  padding: 4px;
+}
+
+.week-tile:hover {
+  transform: scale(1.06);
+  border-color: var(--white);
+  z-index: 2;
+}
+
+.week-tile .w-num {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  opacity: 0.9;
+}
+
+.week-tile .w-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  margin-top: 2px;
+  opacity: 0.5;
+  text-transform: uppercase;
+}
+
+.week-tile.chill {
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--green);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.week-tile.moderate {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--gold);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.week-tile.intense {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--orange);
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.week-tile.boss {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.week-tile.past {
+  opacity: 0.35;
+}
+
+.week-tile.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(74, 124, 255, 0.2);
+  animation: weekPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes weekPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(74, 124, 255, 0.2); }
+  50% { box-shadow: 0 0 18px rgba(74, 124, 255, 0.35); }
+}
+
+.boss-icon {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 10px;
+}
+
+/* week tooltip */
+.week-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  padding: 8px 12px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 20;
+  pointer-events: none;
+  font-family: 'Space Mono', monospace;
+}
+
+.week-tile:hover .week-tip {
+  display: block;
+}
+
+/* legend */
+.map-legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+}
+
+.legend-dot.chill { background: var(--green); }
+.legend-dot.moderate { background: var(--gold); }
+.legend-dot.intense { background: var(--orange); }
+.legend-dot.boss { background: var(--red); }
+
+/* boss fights list */
+.boss-list-section {
+  margin-top: 16px;
+}
+
+.boss-list-section h3 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--white);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.boss-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+}
+
+.boss-item-name {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.boss-item-date {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+}
+
+/* ==== QUEST LIST ==== */
+
+.stress-meter {
+  margin-bottom: 24px;
+}
+
+.meter-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meter-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--text-dim);
+  width: 60px;
+}
+
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quest-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  transition: all 0.15s;
+}
+
+.quest-item.wellness {
+  border-left-color: var(--green);
+}
+
+.quest-item.done {
+  opacity: 0.35;
+}
+
+.quest-item.done .quest-text {
+  text-decoration: line-through;
+}
+
+.quest-check {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--green);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.quest-check:hover {
+  border-color: var(--accent);
+  background: var(--panel-lighter);
+}
+
+.quest-item.done .quest-check {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--bg);
+}
+
+.quest-text {
+  font-size: 13px;
+  flex: 1;
+}
+
+.quest-xp {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--green);
+}
+
+/* ==== CHARACTER SHEET ==== */
+
+.char-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.char-stat-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 20px 12px;
+  text-align: center;
+}
+
+.char-stat-icon {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.char-stat-val {
+  display: block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.char-stat-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* burnout badge */
+.burnout-section {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.burnout-badge {
+  display: inline-block;
+  padding: 10px 24px;
+  border: 1px solid var(--border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+.burnout-badge.safe {
+  color: var(--green);
+  border-color: rgba(34, 197, 94, 0.3);
+  background: var(--green-dim);
+}
+
+.burnout-badge.warning {
+  color: var(--gold);
+  border-color: rgba(245, 158, 11, 0.3);
+  background: var(--gold-dim);
+}
+
+.burnout-badge.danger {
+  color: var(--red);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: var(--red-dim);
+  animation: burnoutFlash 1.5s ease-in-out infinite;
+}
+
+@keyframes burnoutFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* achievements */
+.achievements-section h3 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--white);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.ach-card {
+  text-align: center;
+  padding: 16px 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.ach-card .ach-icon {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.ach-card .ach-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.ach-card.locked {
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+.ach-card.unlocked {
+  border-color: var(--gold);
+  box-shadow: 0 0 8px var(--gold-dim);
+}
+
+.ach-card.unlocked .ach-name {
+  color: var(--gold);
+}
+
+/* ==== MODALS ==== */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-box {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 32px;
+  width: 90%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--white);
+  letter-spacing: 2px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.modal-close:hover { color: var(--white); }
+
+/* shared form stuff for modals */
+.modal-box .field {
+  margin-bottom: 16px;
+}
+
+.modal-box .field label {
+  display: block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.modal-box .field input,
+.modal-box .field select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  outline: none;
+}
+
+.modal-box .field input:focus,
+.modal-box .field select:focus {
+  border-color: var(--accent);
+}
+
+.modal-box .field select {
+  cursor: pointer;
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.range-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.range-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  width: 20px;
+  text-align: center;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+.add-course-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.add-course-btn:hover {
+  border-color: var(--accent);
+  color: var(--white);
+}
+
+.danger-btn {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.danger-btn:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+/* course chips in settings */
+.course-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.course-chip .remove-course {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* deadline rows in add course */
+.deadlines-section {
+  margin-bottom: 16px;
+}
+
+.deadlines-section h3 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.dl-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.dl-row input[type="text"] {
+  flex: 2;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+
+.dl-row input[type="date"] {
+  flex: 1;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+
+.dl-row select {
+  width: 100px;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dl-row .remove-dl {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.small-btn {
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.small-btn:hover {
+  border-color: var(--accent);
+  color: var(--white);
+}
+
+/* ==== RESPONSIVE ==== */
+
+@media (max-width: 768px) {
+  .hud-stats { display: none; }
+  .topbar { flex-wrap: wrap; gap: 8px; height: auto; padding: 10px 16px; }
+  .tab-bar { padding: 0 8px; overflow-x: auto; }
+  .tab { padding: 12px 12px; font-size: 7px; }
+  .dash-main { padding: 16px; }
+  .week-grid { grid-template-columns: repeat(4, 1fr); }
+  .char-stats { grid-template-columns: repeat(2, 1fr); }
+  .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+}

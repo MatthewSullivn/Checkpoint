@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autopilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="topbar-left">
+      <a href="/" class="nav-logo">
+        <span class="logo-square">&#9632;</span>
+        AUTOPILOT
+        <span class="logo-square">&#9632;</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features"><span class="nav-diamond">&#9671;</span> FEATURES</a>
+        <a href="#how"><span class="nav-diamond">&#9671;</span> HOW IT WORKS</a>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a href="/login" class="nav-btn login-btn">&#9632; LOGIN</a>
+      <a href="/signup" class="nav-btn signup-btn">&#9632; SIGN UP</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="hero-title">
+        <span class="hero-auto">auto</span><span class="hero-pilot">pilot</span>
+      </h1>
+      <p class="hero-tagline" id="typewriter"></p>
+      <p class="hero-cursor" id="cursor">|</p>
+      <a href="/signup" class="cta-btn">
+        <span class="btn-square">&#9632;</span>
+        START YOUR QUEST
+        <span class="btn-square">&#9632;</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <h2 class="section-title">&#9632; CORE SYSTEMS &#9632;</h2>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="card-corner tl"></div>
+        <div class="card-corner tr"></div>
+        <div class="card-corner bl"></div>
+        <div class="card-corner br"></div>
+        <div class="feature-icon">&#9763;</div>
+        <h3>SEMESTER MAP</h3>
+        <p>14-week heatmap of your whole semester. Boss fights marked from day one. See the hard weeks before they hit you.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="card-corner tl"></div>
+        <div class="card-corner tr"></div>
+        <div class="card-corner bl"></div>
+        <div class="card-corner br"></div>
+        <div class="feature-icon">&#9876;</div>
+        <h3>QUEST LOG</h3>
+        <p>Daily missions sorted by urgency. One tap to complete. XP awarded instantly. The most satisfying part of your day.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="card-corner tl"></div>
+        <div class="card-corner tr"></div>
+        <div class="card-corner bl"></div>
+        <div class="card-corner br"></div>
+        <div class="feature-icon">&#9829;</div>
+        <h3>LIFE BAR HUD</h3>
+        <p>HP drops when you skip sleep. Stress rises near deadlines. Hit zero and the burnout warning fires. Take care of yourself.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="card-corner tl"></div>
+        <div class="card-corner tr"></div>
+        <div class="card-corner bl"></div>
+        <div class="card-corner br"></div>
+        <div class="feature-icon">&#9733;</div>
+        <h3>CHARACTER SHEET</h3>
+        <p>Your stats page. Sleep streak, total XP, achievements unlocked. See exactly how you're playing the semester.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-section" id="how">
+    <h2 class="section-title">&#9632; HOW IT WORKS &#9632;</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div>
+          <h3>SET YOUR SEMESTER</h3>
+          <p>Enter your start date, end date, and courses. Add every deadline — assignments, midterms, finals. The map builds itself.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div>
+          <h3>PLAY EACH DAY</h3>
+          <p>Check in daily. Log your sleep, stress, exercise. Complete your quests. Watch your XP climb and your HP stay green.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div>
+          <h3>SURVIVE THE BOSS FIGHTS</h3>
+          <p>Midterms and finals are boss fights. Prep quests appear weeks before. Recovery blocks protect you after. Play smart, not hard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p>&#9632; AUTOPILOT &#9632;</p>
+    <p class="footer-sub">your semester is an rpg</p>
+  </footer>
+
+  <script>
+    // typewriter effect
+    var text = "YOUR SEMESTER IS AN RPG ...";
+    var target = document.getElementById('typewriter');
+    var i = 0;
+
+    function type() {
+      if (i < text.length) {
+        target.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, 80);
+      }
+    }
+
+    setTimeout(type, 600);
+
+    // cursor blink
+    var cursor = document.getElementById('cursor');
+    setInterval(function() {
+      cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+    }, 530);
+  </script>
+
+</body>
+</html>
