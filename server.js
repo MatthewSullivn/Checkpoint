@@ -1,5 +1,8 @@
 var express = require('express');
 var session = require('express-session');
+var SqliteStore = require('better-sqlite3-session-store')(session);
+var rateLimit = require('express-rate-limit');
+var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
 var Database = require('better-sqlite3');
 var path = require('path');
@@ -79,11 +82,32 @@ db.exec(`
 // middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// FIX 1: generate a random session secret instead of hardcoding one.
+// persists to a config table so sessions survive restarts.
+db.exec('CREATE TABLE IF NOT EXISTS config (key TEXT PRIMARY KEY, value TEXT)');
+var secretRow = db.prepare('SELECT value FROM config WHERE key = ?').get('session_secret');
+if (!secretRow) {
+  var generated = crypto.randomBytes(48).toString('hex');
+  db.prepare('INSERT INTO config (key, value) VALUES (?, ?)').run('session_secret', generated);
+  secretRow = { value: generated };
+}
+
+// FIX 2: use SQLite-backed session store so sessions persist across restarts
+// and don't leak memory like the default MemoryStore.
+// FIX 6: secure cookie flags — httpOnly blocks XSS cookie theft,
+// sameSite blocks CSRF, secure enforces HTTPS in production.
 app.use(session({
-  secret: 'checkpoint-semester-rpg-2026',
+  store: new SqliteStore({ client: db, expired: { clear: true, intervalMs: 900000 } }),
+  secret: secretRow.value,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }
+  cookie: {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production'
+  }
 }));
 
 // auth guard
@@ -94,6 +118,16 @@ function requireLogin(req, res, next) {
 
 // ============ AUTH ROUTES ============
 
+// FIX 4: rate limit login attempts — 10 per 15 minutes per IP.
+// prevents brute-force password guessing.
+var loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too many login attempts, try again in 15 minutes' }
+});
+
 app.post('/api/signup', function(req, res) {
   var username = (req.body.username || '').trim();
   var email = (req.body.email || '').trim().toLowerCase();
@@ -102,6 +136,12 @@ app.post('/api/signup', function(req, res) {
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'all fields required' });
   }
+
+  // FIX 5: validate email format before hitting the database.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'invalid email format' });
+  }
+
   if (password.length < 6) {
     return res.status(400).json({ error: 'password must be 6+ characters' });
   }
@@ -111,23 +151,38 @@ app.post('/api/signup', function(req, res) {
     return res.status(400).json({ error: 'username or email already taken' });
   }
 
-  var hash = bcrypt.hashSync(password, 10);
-  var result = db.prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)').run(username, email, hash);
-  req.session.userId = result.lastInsertRowid;
-  res.json({ ok: true, user: { id: result.lastInsertRowid, username: username, email: email } });
+  // FIX 3: async bcrypt.hash instead of hashSync — avoids blocking the event loop.
+  bcrypt.hash(password, 10).then(function(hash) {
+    var result = db.prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)').run(username, email, hash);
+    req.session.userId = result.lastInsertRowid;
+    res.json({ ok: true, user: { id: result.lastInsertRowid, username: username, email: email } });
+  }).catch(function(err) {
+    res.status(500).json({ error: 'signup failed' });
+  });
 });
 
-app.post('/api/login', function(req, res) {
+// FIX 4: loginLimiter applied here — blocks brute-force attempts.
+// FIX 3: async bcrypt.compare instead of compareSync.
+// FIX 7: generic error message whether email is wrong or password is wrong
+// — prevents user enumeration. (was already correct, keeping it explicit.)
+app.post('/api/login', loginLimiter, function(req, res) {
   var email = (req.body.email || '').trim().toLowerCase();
   var password = req.body.password || '';
 
   var user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  if (!user) {
     return res.status(401).json({ error: 'invalid email or password' });
   }
 
-  req.session.userId = user.id;
-  res.json({ ok: true, user: { id: user.id, username: user.username, email: user.email } });
+  bcrypt.compare(password, user.password).then(function(match) {
+    if (!match) {
+      return res.status(401).json({ error: 'invalid email or password' });
+    }
+    req.session.userId = user.id;
+    res.json({ ok: true, user: { id: user.id, username: user.username, email: user.email } });
+  }).catch(function(err) {
+    res.status(500).json({ error: 'login failed' });
+  });
 });
 
 app.post('/api/logout', function(req, res) {
