@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autopilot — Your Semester RPG</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- top HUD bar -->
+  <header id="hud">
+    <div class="hud-left">
+      <h1 class="logo">⚔ AUTOPILOT</h1>
+      <span class="level-badge">Level <span id="currentWeek">1</span> / <span id="totalWeeks">16</span></span>
+    </div>
+    <div class="hud-bars">
+      <div class="bar-group">
+        <label>HP <span id="hpText">100</span>/100</label>
+        <div class="bar hp-bar"><div class="bar-fill" id="hpFill" style="width:100%"></div></div>
+      </div>
+      <div class="bar-group">
+        <label>XP <span id="xpText">0</span></label>
+        <div class="bar xp-bar"><div class="bar-fill" id="xpFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <button id="checkInBtn" class="btn-pixel">Daily Check-In</button>
+      <button id="settingsBtn" class="btn-pixel">⚙</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- left panel: semester map -->
+    <section id="semesterMap">
+      <h2>Semester Map</h2>
+      <div id="weekGrid"></div>
+      <div id="legendBar">
+        <span class="legend-item"><span class="dot chill"></span> Chill</span>
+        <span class="legend-item"><span class="dot moderate"></span> Moderate</span>
+        <span class="legend-item"><span class="dot intense"></span> Intense</span>
+        <span class="legend-item"><span class="dot boss"></span> Boss Fight</span>
+      </div>
+    </section>
+
+    <!-- right panel: quests -->
+    <section id="questPanel">
+      <div id="todayQuests">
+        <h2>Today's Quests</h2>
+        <ul id="questList"></ul>
+        <p id="noQuests" class="muted">No quests yet — add courses to begin your adventure.</p>
+      </div>
+
+      <div id="upcomingBosses">
+        <h2>Upcoming Boss Fights</h2>
+        <ul id="bossList"></ul>
+        <p id="noBosses" class="muted">No boss fights on the horizon.</p>
+      </div>
+
+      <div id="achievements">
+        <h2>Achievements</h2>
+        <div id="achievementGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- modal: add course -->
+  <div class="modal-backdrop" id="courseModal">
+    <div class="modal">
+      <h2>Add Course</h2>
+      <form id="courseForm">
+        <label>Course Name
+          <input type="text" id="courseName" placeholder="e.g. CSCI 2110" required>
+        </label>
+        <label>Difficulty (1-5)
+          <input type="range" id="courseDiff" min="1" max="5" value="3">
+          <span id="diffLabel">3</span>
+        </label>
+        <div id="deadlineList">
+          <h3>Deadlines</h3>
+        </div>
+        <button type="button" id="addDeadlineBtn" class="btn-pixel btn-sm">+ Add Deadline</button>
+        <div class="modal-actions">
+          <button type="submit" class="btn-pixel">Save Course</button>
+          <button type="button" class="btn-pixel btn-ghost" id="closeCourseModal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- modal: daily check-in -->
+  <div class="modal-backdrop" id="checkinModal">
+    <div class="modal">
+      <h2>Daily Check-In</h2>
+      <form id="checkinForm">
+        <label>How'd you sleep? (1-5)
+          <input type="range" id="sleepScore" min="1" max="5" value="3">
+          <span id="sleepLabel">3</span>
+        </label>
+        <label>Stress level (1-5)
+          <input type="range" id="stressScore" min="1" max="5" value="3">
+          <span id="stressLabel">3</span>
+        </label>
+        <label>Did you exercise today?
+          <select id="exerciseCheck">
+            <option value="no">Nah</option>
+            <option value="yes">Yeah!</option>
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="submit" class="btn-pixel">Log It</button>
+          <button type="button" class="btn-pixel btn-ghost" id="closeCheckinModal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- modal: settings / semester setup -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal">
+      <h2>Semester Setup</h2>
+      <form id="settingsForm">
+        <label>Semester Start Date
+          <input type="date" id="semStart" required>
+        </label>
+        <label>Semester End Date
+          <input type="date" id="semEnd" required>
+        </label>
+        <label>I'm a...
+          <select id="energyType">
+            <option value="morning">Morning person</option>
+            <option value="night">Night owl</option>
+            <option value="afternoon">Afternoon warrior</option>
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="submit" class="btn-pixel">Save</button>
+          <button type="button" class="btn-pixel btn-ghost" id="closeSettingsModal">Cancel</button>
+        </div>
+      </form>
+      <hr>
+      <button id="addCourseBtn" class="btn-pixel" style="width:100%">+ Add Course</button>
+      <div id="courseListDisplay"></div>
+      <hr>
+      <button id="resetBtn" class="btn-pixel btn-danger" style="width:100%">Reset Everything</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
