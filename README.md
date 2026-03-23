@@ -1,6 +1,8 @@
 # Checkpoint
 
-A semester planner that treats your academic term like an RPG. Built for Hack to the Future 2026.
+🥈 2nd Place — Dalhousie Hackers Society's Hack to the Future 2026
+
+A semester planner that treats your academic term like an RPG.
 
 ## What it does
 
